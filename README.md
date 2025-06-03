@@ -37,12 +37,8 @@ cd go-crud
 ```
 
 2. Install Dependencies
-   bash
-   Copy code
    go mod tidy
 3. Run the Server
-   bash
-   Copy code
    go run main.go
    Server runs on: http://localhost:8000
 
@@ -57,9 +53,6 @@ GET /books/{id}
 POST /books
 
 Body (raw JSON):
-
-json
-Copy code
 {
 "title": "The Go Programming Language",
 "author": "Alan A. A. Donovan"
@@ -68,9 +61,6 @@ Copy code
 PUT /books/{id}
 
 Body (raw JSON):
-
-json
-Copy code
 {
 "id": 1,
 "title": "The Go Programming Language (Updated)",
@@ -90,9 +80,6 @@ SQLite Lightweight DB
 Use Postman or curl to test each endpoint.
 
 Example curl:
-
-bash
-Copy code
 curl -X POST http://localhost:8000/books \
 -H "Content-Type: application/json" \
 -d '{"title":"Golang Basics","author":"Yuvraj Singh Nain"}'
