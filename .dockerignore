@@ -1,0 +1,8 @@
+# don't copy these into container 
+bin /
+*.log 
+*.db
+*.exe
+*.out
+*.test 
+vendor/
