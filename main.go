@@ -22,66 +22,134 @@ type Book struct {
 
 func initDB() {
 	var err error
-	db, err = gorm.Open(sqlite.Open("books.db"), &gorm.Config{})
+	// Use a database path that works well in containers
+	db, err = gorm.Open(sqlite.Open("./books.db"), &gorm.Config{})
 
 	if err != nil {
-		panic("Failed to connect database")
+		log.Printf("Database connection error: %v", err)
+		log.Fatal("Failed to connect database")
 	}
 
-	db.AutoMigrate(&Book{})
+	// Auto-migrate the schema
+	err = db.AutoMigrate(&Book{})
+	if err != nil {
+		log.Printf("Migration error: %v", err)
+		log.Fatal("Failed to migrate database")
+	}
+
+	log.Println("Database connected and migrated successfully")
 }
 
 func getBooks(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	var books []Book
-	db.Find(&books)
+	result := db.Find(&books)
+	if result.Error != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to fetch books"})
+		return
+	}
 	json.NewEncoder(w).Encode(books)
 }
 
 func getbook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
-	id, _ := strconv.Atoi(params["id"])
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid ID"})
+		return
+	}
 
 	var book Book
 	result := db.First(&book, id)
 
 	if result.Error != nil {
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprint(w, "Book not found")
+		json.NewEncoder(w).Encode(map[string]string{"error": "Book not found"})
 		return
 	}
 	json.NewEncoder(w).Encode(book)
 }
 
 func createBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	var book Book
-	json.NewDecoder(r.Body).Decode(&book)
-	db.Create(&book)
+	if err := json.NewDecoder(r.Body).Decode(&book); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid JSON"})
+		return
+	}
+	
+	result := db.Create(&book)
+	if result.Error != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to create book"})
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(book)
 }
 
 func updateBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
-	id, _ := strconv.Atoi(params["id"])
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid ID"})
+		return
+	}
 
 	var book Book
 	result := db.First(&book, id)
 	if result.Error != nil {
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprint(w, "Book not found")
+		json.NewEncoder(w).Encode(map[string]string{"error": "Book not found"})
 		return
 	}
-	json.NewDecoder(r.Body).Decode(&book)
-	db.Save(&book)
+	
+	if err := json.NewDecoder(r.Body).Decode(&book); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid JSON"})
+		return
+	}
+	
+	result = db.Save(&book)
+	if result.Error != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to update book"})
+		return
+	}
 	json.NewEncoder(w).Encode(book)
 }
 
 func deleteBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	params := mux.Vars(r)
-	id, _ := strconv.Atoi(params["id"])
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid ID"})
+		return
+	}
 
 	var book Book
-	db.Delete(&book, id)
-	json.NewEncoder(w).Encode("Book deleted successfully")
+	result := db.First(&book, id)
+	if result.Error != nil {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Book not found"})
+		return
+	}
+	
+	result = db.Delete(&book, id)
+	if result.Error != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to delete book"})
+		return
+	}
+	json.NewEncoder(w).Encode(map[string]string{"message": "Book deleted successfully"})
 }
 
 func main() {
