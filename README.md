@@ -94,3 +94,73 @@ Connect a frontend (React, Svelte, etc.)
 
 🧑‍💻 Author
 Made with ❤️ by Yuvraj Singh Nain
+
+
+
+🚀 Level Up from Here
+🧱 1. Add PostgreSQL Instead of SQLite
+SQLite is great for learning, but PostgreSQL is what most companies use in production.
+
+Replace SQLite with Postgres using GORM’s Postgres driver
+
+Create a docker-compose.yml file to spin up Go app + PostgreSQL together
+
+🧪 2. Add Unit Testing (Test-Driven Development Basics)
+Create a main_test.go and write unit tests for each handler:
+
+bash
+Copy
+Edit
+go test ./...
+🔐 3. Add JWT-Based Authentication
+Secure your API
+
+Add login/registration
+
+Protect routes using middleware
+
+🧰 4. Use .env and Config Packages
+Use github.com/joho/godotenv to manage secrets like DB credentials
+
+Add config struct for scalability
+
+⚙️ 5. Add Logging & Middlewares
+Use logrus or zap for structured logs
+
+Add CORS, request logging, panic recovery middleware
+
+📦 6. Deploy It Somewhere
+Options:
+
+🐳 Docker on Render.com, Railway, or Fly.io
+
+Manual server: Ubuntu + Docker + Nginx
+
+Or deploy just the Go binary on VPS
+
+💡 7. Connect a Frontend
+Build a basic frontend (React or Svelte) that consumes your Go API.
+
+📁 8. Structure Code Better
+Use clean architecture:
+
+bash
+Copy
+Edit
+/cmd
+/pkg
+/internal
+/models
+/routes
+/controllers
+🛠️ 9. [Optional] Use Fiber or Gin
+Switch from net/http + mux to:
+
+Gin (fastest Go web framework)
+
+Fiber (Express.js like experience)
+
+✅ Recommended Next Step
+Since you're aiming for remote SDE roles and real-world dev:
+
+➡️ Migrate this to use PostgreSQL + Docker Compose.
